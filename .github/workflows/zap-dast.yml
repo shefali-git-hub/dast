@@ -37,7 +37,7 @@ jobs:
             -z "-config connection.ssl_cert_validation=false" || true
 
       - name: Upload ZAP Scan Report
-        uses: shefali-git-hub/upload-artifact@v4
+        uses: shefali-git-hub/actions/upload-artifact@v4
         with:
           name: zap-scan-report
           path: |
