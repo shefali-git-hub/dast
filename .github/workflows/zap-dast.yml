@@ -14,7 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     name: ZAP Full Scan via Docker
 
+
     steps:
+      - name: Echo a static message
+        run: echo "ZAP DAST Scanning"
+        
       - name: Checkout Repository
         uses: actions/checkout@v4
 
