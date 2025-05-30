@@ -18,10 +18,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Create temp report directory
+        run: |
+          mkdir -p zap-output
+          chmod -R 777 zap-output  # Make sure it's writable by container
+
       - name: Run ZAP Full Scan using Docker
         run: |
           docker run --rm \
-            -v ${{ github.workspace }}:/zap/wrk \
+            -v ${{ github.workspace }}/zap-output:/zap/wrk \
             ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
             -t https://juice-shop.herokuapp.com \
             -r zap_report.html \
@@ -32,4 +37,4 @@ jobs:
         with:
           name: zap-scan-report
           path: |
-            zap_report.html
+            zap-output/zap_report.html
