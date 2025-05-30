@@ -20,7 +20,7 @@ jobs:
         run: echo "ZAP DAST Scanning"
         
       - name: Checkout Repository
-        uses: shefali-git-hub/actions/checkout@v1
+        uses: actions/checkout@v2
 
       - name: Create temp report directory
         run: |
