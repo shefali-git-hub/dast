@@ -14,7 +14,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Start ZAP Docker Container
       run: |
@@ -43,7 +43,7 @@ jobs:
         docker cp zap:/zap/zap_report.html .
 
     - name: Upload Report Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: zap-report
         path: zap_report.html
