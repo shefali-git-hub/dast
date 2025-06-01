@@ -1,1 +1,49 @@
+name: ZAP Authenticated Scan
 
+on:
+  push:
+    branches: [master]
+
+env:
+  ZAP_USERNAME: ${{ secrets.USER_NAME }}
+  ZAP_PASSWORD: ${{ secrets.PASSWORD }}
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Start ZAP Docker Container
+      run: |
+        docker run -u zap -d --name zap \
+          -p 8090:8090 \
+          owasp/zap2docker-stable zap.sh -daemon -host 0.0.0.0 -port 8090 -config api.disablekey=true
+
+    - name: Wait for ZAP to be ready
+      run: |
+        sleep 15  # Wait for ZAP to start
+
+    - name: Authenticate and run scan
+      run: |
+        docker exec zap zap-cli context create "Default Context"
+        docker exec zap zap-cli context include "https://juice-shop.herokuapp.com.*"
+        
+        # Authentication setup (form-based example)
+        docker exec zap zap-cli authentication set-form-based-authentication "Default Context" "loginUrl=https://juice-shop.herokuapp.com/login,loginRequestData=username={%username%}&password={%password%}"
+        docker exec zap zap-cli users new "Default Context" --username "$ZAP_USERNAME" --password "$ZAP_PASSWORD"
+        docker exec zap zap-cli users enable "Default Context" 1
+        docker exec zap zap-cli active-scan --context-name "Default Context" --user-id 1 https://juice-shop.herokuapp.com/protected
+        
+    - name: Generate Report
+      run: |
+        docker exec zap zap-cli report -o zap_report.html -f html
+        docker cp zap:/zap/zap_report.html .
+
+    - name: Upload Report Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: zap-report
+        path: zap_report.html
